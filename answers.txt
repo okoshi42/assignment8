@@ -1,0 +1,11 @@
+jacob okoshi
+
+1. DFS has can be faster sometimes, but BFS will always find the path with the least edges
+
+2. O(|Vertecies|+|Edges|)
+
+3. a social graph would likely need to be updated frequently, and if you were to use a matrix you would need to spend a lot more resources in order to resize the matrix.
+
+4. Depth first search is used when traversing something like a maze, 
+where the person upon reaching an intersection would select one and continue down that path until they reach a dead end or the goal.
+where as BFS would have the person walk down one path at the intersection until they reach another intersection,then backtrack and do the same for the second path of the first intersection.

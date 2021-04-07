@@ -49,7 +49,7 @@ namespace csi281 {
         void addVertex(V vertex) {
             adjacencyList.emplace(vertex, unordered_set<V>());
         }
-        
+
         // Add an edge to the graph
         // *from* is the starting vertex
         // *to* is the ending vertex
@@ -59,33 +59,42 @@ namespace csi281 {
             adjacencyList[from].emplace(to);
             if (bidirectional) {
                 adjacencyList[to].emplace(from);
-            } else { // ensure the *to* vrtex is in the graph
+            }
+            else { // ensure the *to* vrtex is in the graph
                 if (adjacencyList.find(to) == adjacencyList.end()) {
                     addVertex(to);
                 }
             }
         }
-        
+
         // Return the neighbors (as an unordered_set) for a vertex
-        const unordered_set<V> &neighbors(const V &vertex) {
+        const unordered_set<V>& neighbors(const V& vertex) {
             // ensure we actually have this vertex in the graph
-            assert (adjacencyList.find(vertex) != adjacencyList.end());
+            assert(adjacencyList.find(vertex) != adjacencyList.end());
             return adjacencyList[vertex];
         }
-        
+
         // Determines whether there is an edge between *from* and *to*
         // if either is not in the graph, return false
-        bool edgeExists(const V &from, const V &to) {
-            // YOUR CODE HERE
+        bool edgeExists(const V& from, const V& to) {
+    
+            if (adjacencyList.find(from) == adjacencyList.end() || adjacencyList.find(to) == adjacencyList.end()) {
+                return false;
+            }
+            const unordered_set<V>& neighborList = neighbors(from);
+
+            if (neighborList.find(to) == neighborList.end())return false;
+            else return true;
+
         }
-        
+
         using Path = list<V>;
         // Figure out a path from a goal node back to
         // a start node using a map keeping track of each node and the
         // node that got to it (your explored map)
-        Path pathMapToPath(unordered_map<V, V> &previousMap, V &goal) {
+        Path pathMapToPath(unordered_map<V, V>& previousMap, V& goal) {
             Path path = Path();
-            V *current, *previous = nullptr;
+            V* current, * previous = nullptr;
             current = &goal;
             do {
                 path.push_front(*current);
@@ -94,34 +103,66 @@ namespace csi281 {
             } while (*current != *previous);
             return path;
         }
-        
+
         // Perform a depth-first search from *start*, looking for *goal*
         // Return a path if one is found using pathMathToPath (with explored)
         // or return nullopt if no path is found
-        optional<Path> dfs(const V &start, const V &goal) {
+        optional<Path> dfs(const V& start, const V& goal) {
             // how did we get to each node, and which ones have already been visited (dual purpose)
             unordered_map<V, V> explored = unordered_map<V, V>();
             // the start node came from nowhere, so we mark its parent as itself
             explored[start] = start;
-            
+
             // YOUR CODE HERE
             // TIP: Start by defining a frontier and putting start onto it.
             // TIP: Follow the pseudocode from the slides from class
+            stack<V> frontier;
+            frontier.push(start) ;
+            while (!frontier.empty()) {
+                V currentNode = frontier.top();
+                if (goal == currentNode)return pathMapToPath(explored,currentNode);
+                const unordered_set<V>& neighborList = neighbors(currentNode);
+                for (const auto& vert : neighborList) {
+                    if (explored.find(vert) == explored.end()) {
+                        explored.emplace(vert, currentNode);
+                        frontier.push(vert);
+                    }
+                }
+            }
+            return nullopt;
         }
         
         // Perform a breadth-first search from *start*, looking for *goal*
         // Return a path if one is found using pathMathToPath (with explored)
         // or return nullopt if no path is found
         optional<Path> bfs(const V &start, const V &goal) {
-            // how did we get to each node, and which ones have already been visited (dual purpose)
+               // how did we get to each node, and which ones have already been visited (dual purpose)
             unordered_map<V, V> explored = unordered_map<V, V>();
             // the start node came from nowhere, so we mark its parent as itself
             explored[start] = start;
-            
+          
             // YOUR CODE HERE
             // TIP: Start by defining a frontier and putting start onto it.
             // TIP: Follow the pseudocode from the slides from class
             // TIP: This should be very similar to dfs
+            queue<V> frontier;
+            frontier.push(start);
+            while (!frontier.empty()) {
+                V currentNode = frontier.front();
+                if (goal == currentNode)return pathMapToPath(explored, currentNode);
+                const unordered_set<V>& neighborList = neighbors(currentNode);
+                cout << endl << currentNode << "-> ";
+               
+                for (const auto& vert : neighborList) {     
+                    cout << vert << ", ";
+                    if (explored.find(vert) == explored.end()) {
+                        explored.emplace(vert, currentNode);
+                        frontier.push(vert);
+                    }
+                }
+                frontier.pop();
+            }
+            return nullopt;
         }
         
         // Utility function if you need it
